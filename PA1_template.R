@@ -1,58 +1,35 @@
----
-title: "PA1_template.Rmd"
-author: "VM"
-date: "7/26/2020"
-output: html_document
----
-#Downloading and unzipping the dataset
-```{r, echo=TRUE}
+#Dowloading and unzipping the dataset
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile = "activity.zip", mode="wb")
 unzip("activity.zip")
-```
 
 #Reading the data
-```{r, echo=TRUE}
 data <- read.csv("activity.csv", header = TRUE)
-```
 
 #Calculating the total number of steps per day
-```{r, echo=TRUE}
 library(ggplot2)
 total_steps <- tapply(data$steps, data$date, FUN=sum, na.rm=TRUE)
-```
 
 #Plotting a histogram of total number of steps per day
-```{r, echo=TRUE}
 qplot(total_steps, binwidth = 1000, col = "blue", xlab="Total steps per day", ylab = "Frequency", main="Total number of steps per day")
-```
 
 #Calculating mean and median
-```{r, echo=TRUE}
 mean(total_steps, na.rm=TRUE)
 median(total_steps, na.rm=TRUE)
-```
 
 #Average number of steps taken
-```{r, echo=TRUE}
 average_steps <- aggregate(x=list(steps=data$steps), by=list(interval=data$interval),
                       FUN=mean, na.rm=TRUE)
-```
 
 #Time series plot
-```{r, echo=TRUE}
 ggplot(data=average_steps, aes(x=interval, y=steps)) +
   geom_line() +
   xlab("Interval") +
   ylab("Average number of steps taken")
-```
 
 #The 5-minute interval that, on average, contains the maximum number of steps
-```{r, echo=TRUE}
 average_steps[which.max(average_steps$steps),]
-```
 
 #Imputing missing data
-```{r, echo=TRUE}
 missing <- is.na(data$steps)
 fill_values <- function(steps, interval) {
   filled <- NA
@@ -64,22 +41,16 @@ fill_values <- function(steps, interval) {
 }
 filled_data <- data
 filled_data$steps <- mapply(fill_values, filled_data$steps, filled_data$interval)
-```
 
 #Creating a histogram of total number of steps per day after imputing data
-```{r, echo=TRUE}
 imputed_total_steps <- tapply(filled_data$steps, filled_data$date, FUN=sum)
 qplot(imputed_total_steps, binwidth = 1000, col = "blue", xlab="Total steps per day", ylab = "Frequency", main="Total number of steps per day")
-```
 
 #Calculating mean and median
-```{r, echo=TRUE}
 mean(imputed_total_steps)
 median(imputed_total_steps)
-```
 
 #Computing weekday or weekend
-```{r, echo=TRUE}
 week_day <- function(date) {
   day <- weekdays(date)
   if (day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
@@ -91,12 +62,8 @@ week_day <- function(date) {
 }
 filled_data$date <- as.Date(filled_data$date)
 filled_data$day <- sapply(filled_data$date, FUN=week_day)
-```
 
 #Plot
-```{r, echo=TRUE}
 average_steps_weekday <- aggregate(steps ~ interval + day, data=filled_data, mean)
 ggplot(average_steps_weekday, aes(interval, steps)) + geom_line() + facet_grid(day ~ .) +
   xlab("Interval") + ylab("Number of steps")
-```
-
